@@ -12,31 +12,31 @@ public interface StudentService {
 
 	StudentDTO createStudent(StudentDTO student);
 
-	Student getStudentbyId(String id);
+	StudentDTO getStudentbyId(String id);
 
-	List<Student> getAllStudent();
+	List<StudentDTO> getAllStudent();
 
-	Student updateStudent(Student student);
+	String updateStudent(StudentDTO student);
 
 	String deleteStudent(String id);
 
-	List<Student> getStudentBynName(String name);
+	List<StudentDTO> getStudentBynName(String name);
 
-	List<Student> studentBynameANDMail(String name, String email);
+	List<StudentDTO> studentBynameANDMail(String name, String email);
 
-	List<Student> studentBynameORMail(String name, String email);
+	List<StudentDTO> studentBynameORMail(String name, String email);
 
 	List<Student> getallWithPagination(int page, int limit);
 
 	List<Student> getSort();
 
-	List<Student> getbydept(String deptname);
+	List<StudentDTO> getbydept(String deptname);
 
-	List<Student> studentBySubjectName(String subject);
+	List<StudentDTO> studentBySubjectName(String subject);
 
-	List<Student> findStudentByGmail(String fieldName, String tag);
+	List<StudentDTO> findStudentByGmail(String fieldName, String tag);
 
-	List<Student> nameStartWith(String name);
+	List<StudentDTO> nameStartWith(String name);
 
 	List<Student> getByDptId(String deptId);
 

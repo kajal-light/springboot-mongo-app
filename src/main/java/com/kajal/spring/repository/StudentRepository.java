@@ -38,4 +38,5 @@ public interface StudentRepository extends MongoRepository<Student, String> {
 	List<Student> findByDepartmentId(String deptId);
 	
 
+	
 }
