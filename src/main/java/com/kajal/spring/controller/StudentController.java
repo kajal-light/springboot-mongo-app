@@ -3,6 +3,8 @@ package com.kajal.spring.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kajal.spring.dto.StudentDTO;
 import com.kajal.spring.entity.Student;
+import com.kajal.spring.exception.StudentExistsException;
 import com.kajal.spring.service.StudentService;
 
 @RestController
@@ -25,9 +28,14 @@ public class StudentController {
 	StudentService studentService;
 
 	@PostMapping("/create")
-	public StudentDTO createStudent(@RequestBody StudentDTO student) {
+	//return type ResponseEntity<StudentDTO>
+	public StudentDTO createStudent(@RequestBody StudentDTO student) throws StudentExistsException {
 
-		return studentService.createStudent(student);
+		try {
+			return studentService.createStudent(student);
+		} catch (StudentExistsException e) {
+			throw new StudentExistsException(HttpStatus.NOT_ACCEPTABLE, "Student with the given email already exists!");			
+		}
 	}
 
 	@GetMapping("/getById/{id}")

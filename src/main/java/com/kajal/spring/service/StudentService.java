@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 
 import com.kajal.spring.dto.StudentDTO;
 import com.kajal.spring.entity.Student;
+import com.kajal.spring.exception.StudentExistsException;
 
 @Service
 public interface StudentService {
 
-	StudentDTO createStudent(StudentDTO student);
+	StudentDTO createStudent(StudentDTO student) throws StudentExistsException;
 
 	StudentDTO getStudentbyId(String id);
 

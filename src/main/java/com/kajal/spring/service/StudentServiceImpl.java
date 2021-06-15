@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.kajal.spring.dto.DepartmentDTO;
@@ -18,6 +19,7 @@ import com.kajal.spring.dto.SubjectDTO;
 import com.kajal.spring.entity.Department;
 import com.kajal.spring.entity.Student;
 import com.kajal.spring.entity.Subject;
+import com.kajal.spring.exception.StudentExistsException;
 import com.kajal.spring.repository.DepartmentRepository;
 import com.kajal.spring.repository.StudentRepository;
 import com.kajal.spring.repository.SubjectRepository;
@@ -37,12 +39,14 @@ public class StudentServiceImpl implements StudentService {
 	@Autowired
 	DepartmentRepository departmentRepository;
 
-	public StudentDTO createStudent(StudentDTO student) {
+	public StudentDTO createStudent(StudentDTO student) throws StudentExistsException {
 
-		Student stu = new Student();
+		
 		if (!findStudentByGmail("email", student.getEmail()).isEmpty()) {
-			return new StudentDTO();
+			//if there is any record for a given email then we should throw StudentExistsException
+			throw new StudentExistsException(HttpStatus.NOT_ACCEPTABLE, "Student with the given email already exists!");
 		}
+		Student stu = new Student();
 		Department department = new Department();
 		List<Subject> subjectList = new ArrayList<>();
 		if (student.getDepartment() != null) {
