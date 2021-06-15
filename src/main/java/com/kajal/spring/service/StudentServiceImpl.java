@@ -38,6 +38,7 @@ public class StudentServiceImpl implements StudentService {
 	DepartmentRepository departmentRepository;
 
 	public StudentDTO createStudent(StudentDTO student) {
+
 		Student stu = new Student();
 		if (!findStudentByGmail("email", student.getEmail()).isEmpty()) {
 			return new StudentDTO();
@@ -66,7 +67,11 @@ public class StudentServiceImpl implements StudentService {
 		stu.setDepartment(department);
 		stu.setName(student.getName());
 		stu.setSubject(subjectList);
+		
+		
 		stu = studentRepository.save(stu);
+		
+		
 		student.setId(stu.getId());
 		student.getDepartment().setId(stu.getDepartment().getId());
 		for (int i = 0; i < subjectList.size(); i++) {
@@ -290,17 +295,93 @@ public class StudentServiceImpl implements StudentService {
 
 	}
 
-	public List<Student> getallWithPagination(int page, int limit) {
+	public List<StudentDTO> getallWithPagination(int page, int limit) {
+		List<StudentDTO> studentdtoList = new ArrayList<>();
 
 		Pageable pageable = PageRequest.of(page - 1, limit);
-		return studentRepository.findAll(pageable).getContent();
+		
+		 List<Student>	studentpage =studentRepository.findAll(pageable).getContent();
+		
+		for(Student student:studentpage) {
+		
+			StudentDTO studentDTO = new StudentDTO();
+			studentDTO.setEmail(student.getEmail());
+			studentDTO.setId(student.getId());
+			studentDTO.setName(student.getName());
+
+			DepartmentDTO departmentDto = new DepartmentDTO();
+			departmentDto.setDepartmentName(student.getDepartment().getDepartmentName());
+			departmentDto.setId(student.getDepartment().getId());
+			departmentDto.setLocation(student.getDepartment().getLocation());
+			studentDTO.setDepartment(departmentDto);
+
+			List<SubjectDTO> subjectDtoList = new ArrayList<>();
+			for (int i = 0; i < student.getSubject().size(); i++) {
+				SubjectDTO subjectDTO = new SubjectDTO();
+				subjectDTO.setId(student.getSubject().get(i).getId());
+				subjectDTO.setSubjectName(student.getSubject().get(i).getSubjectName());
+				subjectDTO.setMarkObtained(student.getSubject().get(i).getMarkObtained());
+
+				subjectDtoList.add(subjectDTO);
+			}
+			studentDTO.setSubject(subjectDtoList);
+			studentdtoList.add(studentDTO);
+		}
+
+		return studentdtoList;
+
+			
 
 	}
 
-	public List<Student> getSort() {
-		Sort sort = Sort.by(Sort.Direction.ASC, "name");
+	public List<StudentDTO> getSort() {
 
-		return studentRepository.findAll(sort);
+		
+	
+		
+		Sort sort = Sort.by(Sort.Direction.ASC, "name");
+		
+		List<StudentDTO> studentdtoList = new ArrayList<>();
+
+		
+		
+		 List<Student>	studentpage =studentRepository.findAll(sort);
+				
+		
+		for(Student student:studentpage) {
+		
+			StudentDTO studentDTO = new StudentDTO();
+			studentDTO.setEmail(student.getEmail());
+			studentDTO.setId(student.getId());
+			studentDTO.setName(student.getName());
+
+			DepartmentDTO departmentDto = new DepartmentDTO();
+			departmentDto.setDepartmentName(student.getDepartment().getDepartmentName());
+			departmentDto.setId(student.getDepartment().getId());
+			departmentDto.setLocation(student.getDepartment().getLocation());
+			studentDTO.setDepartment(departmentDto);
+
+			List<SubjectDTO> subjectDtoList = new ArrayList<>();
+			
+			for (int i = 0; i < student.getSubject().size(); i++) {
+				SubjectDTO subjectDTO = new SubjectDTO();
+				subjectDTO.setId(student.getSubject().get(i).getId());
+				subjectDTO.setSubjectName(student.getSubject().get(i).getSubjectName());
+				subjectDTO.setMarkObtained(student.getSubject().get(i).getMarkObtained());
+
+				subjectDtoList.add(subjectDTO);
+			}
+			studentDTO.setSubject(subjectDtoList);
+			studentdtoList.add(studentDTO);
+		}
+
+		return studentdtoList;
+		
+		
+		
+		
+	
+
 	}
 
 	public List<StudentDTO> getbydept(String deptname) {

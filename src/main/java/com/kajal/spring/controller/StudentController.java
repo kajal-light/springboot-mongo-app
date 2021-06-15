@@ -77,14 +77,16 @@ public class StudentController {
 	}
 
 	@GetMapping("/allWithPagination")
-	public List<Student> getallWithPagination(@RequestParam int page, @RequestParam int limit) {
+	public List<StudentDTO> getallWithPagination(@RequestParam int page, @RequestParam int limit) {
 
 		return studentService.getallWithPagination(page, limit);
 
 	}
 
 	@GetMapping("/getSort")
-	public List<Student> getSort() {
+	public List<StudentDTO> getSort() {
+		
+		
 		return studentService.getSort();
 
 	}

@@ -26,9 +26,9 @@ public interface StudentService {
 
 	List<StudentDTO> studentBynameORMail(String name, String email);
 
-	List<Student> getallWithPagination(int page, int limit);
+	List<StudentDTO> getallWithPagination(int page, int limit);
 
-	List<Student> getSort();
+	List<StudentDTO> getSort();
 
 	List<StudentDTO> getbydept(String deptname);
 
