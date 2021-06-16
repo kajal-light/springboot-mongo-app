@@ -3,6 +3,7 @@ package com.kajal.spring.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +20,11 @@ import com.kajal.spring.dto.SubjectDTO;
 import com.kajal.spring.entity.Department;
 import com.kajal.spring.entity.Student;
 import com.kajal.spring.entity.Subject;
+import com.kajal.spring.exception.InvalidEmailException;
+import com.kajal.spring.exception.NoDepartmentfound;
+import com.kajal.spring.exception.NoSuchNameException;
 import com.kajal.spring.exception.StudentExistsException;
+import com.kajal.spring.exception.StudentNotFoundException;
 import com.kajal.spring.repository.DepartmentRepository;
 import com.kajal.spring.repository.StudentRepository;
 import com.kajal.spring.repository.SubjectRepository;
@@ -39,11 +44,15 @@ public class StudentServiceImpl implements StudentService {
 	@Autowired
 	DepartmentRepository departmentRepository;
 
-	public StudentDTO createStudent(StudentDTO student) throws StudentExistsException {
+	public StudentDTO createStudent(StudentDTO student) throws StudentExistsException, InvalidEmailException {
 
-		
+		if (!validEmail(student.getEmail())) {
+			throw new InvalidEmailException(HttpStatus.PRECONDITION_FAILED, "Given Email is invalid");
+		}
+
 		if (!findStudentByGmail("email", student.getEmail()).isEmpty()) {
-			//if there is any record for a given email then we should throw StudentExistsException
+			// if there is any record for a given email then we should throw
+			// StudentExistsException
 			throw new StudentExistsException(HttpStatus.NOT_ACCEPTABLE, "Student with the given email already exists!");
 		}
 		Student stu = new Student();
@@ -71,11 +80,9 @@ public class StudentServiceImpl implements StudentService {
 		stu.setDepartment(department);
 		stu.setName(student.getName());
 		stu.setSubject(subjectList);
-		
-		
+
 		stu = studentRepository.save(stu);
-		
-		
+
 		student.setId(stu.getId());
 		student.getDepartment().setId(stu.getDepartment().getId());
 		for (int i = 0; i < subjectList.size(); i++) {
@@ -86,10 +93,23 @@ public class StudentServiceImpl implements StudentService {
 
 	}
 
-	public StudentDTO getStudentbyId(String id) {
+	private boolean validEmail(String email) {
+		String emailRegex = "^(.+)@(.+)$";
+		return Pattern.matches(emailRegex, email);
+
+	}
+
+	public StudentDTO getStudentbyId(String id) throws StudentNotFoundException {
+
+		Optional<Student> studentEntity = studentRepository.findById(id);
+		if (!studentEntity.isPresent()) {
+			// if there is any record for a given email then we should throw
+			// StudentExistsException
+			throw new StudentNotFoundException(HttpStatus.NOT_FOUND, "student with is id not found");
+		}
+		Student stu = studentEntity.get();
 
 		StudentDTO student = new StudentDTO();
-		Student stu = studentRepository.findById(id).orElse(new Student());
 
 		student.setId(stu.getId());
 		student.setName(stu.getName());
@@ -186,18 +206,32 @@ public class StudentServiceImpl implements StudentService {
 		}
 	}
 
-	public String deleteStudent(String id) {
+	public String deleteStudent(String id) throws StudentNotFoundException {
+
+		Optional<Student> studentEntity = studentRepository.findById(id);
+		if (!studentEntity.isPresent()) {
+			// if there is any record for a given email then we should throw
+			// StudentExistsException
+			throw new StudentNotFoundException(HttpStatus.NON_AUTHORITATIVE_INFORMATION,
+					"student with is id not found");
+		}
 
 		studentRepository.deleteById(id);
 
 		return "deleted";
 	}
 
-	public List<StudentDTO> getStudentBynName(String name) {
-
-		List<StudentDTO> studentdtoList = new ArrayList<>();
+	public List<StudentDTO> getStudentByName(String name) throws NoSuchNameException {
 
 		List<Student> stuList = studentRepository.findByName(name);
+
+		if (stuList.isEmpty()) {
+
+			throw new NoSuchNameException(HttpStatus.NO_CONTENT, "no such user found sorry");
+
+		}
+
+		List<StudentDTO> studentdtoList = new ArrayList<>();
 
 		for (Student student : stuList) {
 
@@ -229,7 +263,7 @@ public class StudentServiceImpl implements StudentService {
 
 	}
 
-	public List<StudentDTO> studentBynameANDMail(String name, String email) {
+	public List<StudentDTO> findStudentByNameAndMail(String name, String email) {
 
 		List<StudentDTO> studentdtoList = new ArrayList<>();
 
@@ -264,7 +298,7 @@ public class StudentServiceImpl implements StudentService {
 
 	}
 
-	public List<StudentDTO> studentBynameORMail(String name, String email) {
+	public List<StudentDTO> findStudentByNameOrMail(String name, String email) {
 
 		List<StudentDTO> studentdtoList = new ArrayList<>();
 
@@ -299,15 +333,15 @@ public class StudentServiceImpl implements StudentService {
 
 	}
 
-	public List<StudentDTO> getallWithPagination(int page, int limit) {
-		List<StudentDTO> studentdtoList = new ArrayList<>();
+	public List<StudentDTO> getAllWithPagination(int page, int limit) {
+		List<StudentDTO> studentDTOList = new ArrayList<>();
 
 		Pageable pageable = PageRequest.of(page - 1, limit);
-		
-		 List<Student>	studentpage =studentRepository.findAll(pageable).getContent();
-		
-		for(Student student:studentpage) {
-		
+
+		List<Student> studentPage = studentRepository.findAll(pageable).getContent();
+
+		for (Student student : studentPage) {
+
 			StudentDTO studentDTO = new StudentDTO();
 			studentDTO.setEmail(student.getEmail());
 			studentDTO.setId(student.getId());
@@ -329,31 +363,23 @@ public class StudentServiceImpl implements StudentService {
 				subjectDtoList.add(subjectDTO);
 			}
 			studentDTO.setSubject(subjectDtoList);
-			studentdtoList.add(studentDTO);
+			studentDTOList.add(studentDTO);
 		}
 
-		return studentdtoList;
-
-			
+		return studentDTOList;
 
 	}
 
 	public List<StudentDTO> getSort() {
 
-		
-	
-		
 		Sort sort = Sort.by(Sort.Direction.ASC, "name");
-		
+
 		List<StudentDTO> studentdtoList = new ArrayList<>();
 
-		
-		
-		 List<Student>	studentpage =studentRepository.findAll(sort);
-				
-		
-		for(Student student:studentpage) {
-		
+		List<Student> studentpage = studentRepository.findAll(sort);
+
+		for (Student student : studentpage) {
+
 			StudentDTO studentDTO = new StudentDTO();
 			studentDTO.setEmail(student.getEmail());
 			studentDTO.setId(student.getId());
@@ -366,7 +392,7 @@ public class StudentServiceImpl implements StudentService {
 			studentDTO.setDepartment(departmentDto);
 
 			List<SubjectDTO> subjectDtoList = new ArrayList<>();
-			
+
 			for (int i = 0; i < student.getSubject().size(); i++) {
 				SubjectDTO subjectDTO = new SubjectDTO();
 				subjectDTO.setId(student.getSubject().get(i).getId());
@@ -380,19 +406,24 @@ public class StudentServiceImpl implements StudentService {
 		}
 
 		return studentdtoList;
-		
-		
-		
-		
-	
 
 	}
 
-	public List<StudentDTO> getbydept(String deptname) {
+	public List<StudentDTO> getByDept(String deptName) throws NoDepartmentfound {
 
+		List<Student> stuList = studentRepository.findByDepartmentName(deptName);
+		
+		if(stuList.isEmpty()) {
+			
+			throw new NoDepartmentfound(HttpStatus.EXPECTATION_FAILED,
+					"Department not found");
+			
+		}
+		
+		
+		
+		
 		List<StudentDTO> studentdtoList = new ArrayList<>();
-
-		List<Student> stuList = studentRepository.findByDepartmentName(deptname);
 
 		for (Student student : stuList) {
 

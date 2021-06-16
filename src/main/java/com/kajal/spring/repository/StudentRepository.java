@@ -1,6 +1,7 @@
 package com.kajal.spring.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -37,6 +38,6 @@ public interface StudentRepository extends MongoRepository<Student, String> {
 	
 	List<Student> findByDepartmentId(String deptId);
 	
-
+	Optional<Student> findById(String id);
 	
 }
