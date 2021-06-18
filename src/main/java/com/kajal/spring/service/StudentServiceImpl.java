@@ -139,6 +139,7 @@ public class StudentServiceImpl implements StudentService {
 
 	public List<StudentDTO> getAllStudent() {
 
+
 		List<StudentDTO> studentdtoList = new ArrayList<>();
 
 		List<Student> stuList = studentRepository.findAll();
@@ -188,6 +189,7 @@ public class StudentServiceImpl implements StudentService {
 			if (student.getSubject() != null && !student.getSubject().isEmpty()) {
 				for (SubjectDTO subjectDTO : student.getSubject()) {
 					Subject subject = new Subject();
+					
 					subject.setId(subjectDTO.getId());
 					subject.setSubjectName(subjectDTO.getSubjectName());
 					subject.setMarkObtained(subjectDTO.getMarkObtained());
@@ -208,6 +210,8 @@ public class StudentServiceImpl implements StudentService {
 
 	public String deleteStudent(String id) throws StudentNotFoundException {
 
+		
+
 		Optional<Student> studentEntity = studentRepository.findById(id);
 		if (!studentEntity.isPresent()) {
 			// if there is any record for a given email then we should throw
@@ -222,6 +226,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	public List<StudentDTO> getStudentByName(String name) throws NoSuchNameException {
+
 
 		List<Student> stuList = studentRepository.findByName(name);
 
@@ -265,6 +270,7 @@ public class StudentServiceImpl implements StudentService {
 
 	public List<StudentDTO> findStudentByNameAndMail(String name, String email) {
 
+
 		List<StudentDTO> studentdtoList = new ArrayList<>();
 
 		List<Student> stuList = studentRepository.findByNameAndEmail(name, email);
@@ -299,6 +305,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	public List<StudentDTO> findStudentByNameOrMail(String name, String email) {
+
 
 		List<StudentDTO> studentdtoList = new ArrayList<>();
 
